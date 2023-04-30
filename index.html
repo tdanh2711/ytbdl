@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Youtube Downloader</title>
+</head>
+<body>
+  <input type="text" name="url" id="url">
+  <button id="btn-download">Download</button>
+  <script type="text/javascript">
+    const getMp3Data = async (youtubeLink) => {
+      const resp = await fetch("https://x2download.app/api/ajaxSearch", {
+        "headers": {
+          "accept": "*/*",
+          "accept-language": "en-US,en;q=0.9,vi;q=0.8",
+          "cache-control": "no-cache",
+          "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
+          "pragma": "no-cache",
+          "sec-ch-ua": "\"Chromium\";v=\"112\", \"Google Chrome\";v=\"112\", \"Not:A-Brand\";v=\"99\"",
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": "\"macOS\"",
+          "sec-fetch-dest": "empty",
+          "sec-fetch-mode": "no-cors",
+          "x-requested-with": "XMLHttpRequest"
+        },
+        "referrer": "https://x2download.app/en66/download-youtube-to-mp3",
+        "referrerPolicy": "strict-origin-when-cross-origin",
+        "body": `q=${encodeURIComponent(youtubeLink)}&vt=mp3`,
+        "method": "POST",
+        "mode": "cors",
+        "credentials": "include"
+      });
+      const data = await resp.json()
+      return data
+    }
+
+    const getMp3Link = async (mp3Data) => {
+      const { token, vid: v_id, timeExpires: timeExpire, links: { mp3 } } = mp3Data
+      const mp3Key = Object.keys(mp3).find(k => mp3[k].k === '128') || '1'
+      const mp3Info = mp3[mp3Key]
+      if (!mp3Info) return null
+
+      const ftype = 'mp3'
+      const fquality = +mp3Info.k
+      const client = 'X2Download.app'
+
+      const resp = await fetch("https://backend.svcenter.xyz/api/convert-by-45fc4be8916916ba3b8d61dd6e0d6994", {
+        "headers": {
+          "accept": "*/*",
+          "accept-language": "en-US,en;q=0.9,vi;q=0.8",
+          "cache-control": "no-cache",
+          "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
+          "pragma": "no-cache",
+          "sec-ch-ua": "\"Chromium\";v=\"112\", \"Google Chrome\";v=\"112\", \"Not:A-Brand\";v=\"99\"",
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": "\"macOS\"",
+          "sec-fetch-dest": "empty",
+          "sec-fetch-mode": "cors",
+          "sec-fetch-site": "cross-site",
+          "x-requested-key": "de0cfuirtgf67a"
+        },
+        "referrer": "https://x2download.app/",
+        "referrerPolicy": "strict-origin-when-cross-origin",
+        "body": `v_id=${v_id}&ftype=${ftype}&fquality=${fquality}&token=${token}&timeExpire=${timeExpire}&client=${client}`,
+        "method": "POST",
+        "mode": "cors",
+        "credentials": "omit"
+      });
+      const data = await resp.json()
+      return data.d_url
+    }
+
+    const downloadFile = (url, title) => {
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = title;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+    const downloadYoutube = async () => {
+      const youtubeLink = document.getElementById('url').value
+      if (!youtubeLink) {
+        return alert('Vui lòng nhập link Youtube')
+      }
+
+      const mp3Data = await getMp3Data(youtubeLink)
+      const link = await getMp3Link(mp3Data)
+      if (!link) {
+        return alert('Không thể tải video này, vui lòng thử tải video khác')
+      }
+
+      downloadFile(link, mp3Data.title)
+    }
+
+    document.getElementById('btn-download').onclick = downloadYoutube
+  </script>
+</body>
+</html>
