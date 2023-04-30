@@ -9,7 +9,15 @@
 <body>
   <input type="text" name="url" id="url">
   <button id="btn-download">Download</button>
+  <script src="https://unpkg.com/googleapis@113.0.0/build/src/index.js"></script>
   <script type="text/javascript">
+    const API_KEY = 'AIzaSyDPdM-irSg-ZEF0qAQga52R6TSSnmlizjM'
+    gapi.load('client', function() {
+      gapi.client.init({
+        apiKey: API_KEY
+      });
+    });
+
     const getMp3Data = async (youtubeLink) => {
       const resp = await fetch("https://x2download.app/api/ajaxSearch", {
         "headers": {
@@ -81,7 +89,7 @@
       document.body.removeChild(a);
     }
 
-    const downloadYoutube = async () => {
+    const downloadYoutube1 = async () => {
       const youtubeLink = document.getElementById('url').value
       if (!youtubeLink) {
         return alert('Vui lòng nhập link Youtube')
@@ -94,6 +102,27 @@
       }
 
       downloadFile(link, mp3Data.title)
+    }
+
+    const downloadYoutube = async () => {
+      const youtubeLink = document.getElementById('url').value
+      if (!youtubeLink) {
+        return alert('Vui lòng nhập link Youtube')
+      }
+
+      // Make an API request to get video info
+      const response = await gapi.client.youtube.videos.list({
+        part: 'snippet,contentDetails',
+        id: 'VIDEO_ID'
+      })
+
+      // Extract video and audio links from the API response
+      const videoUrl = 'https://www.youtube.com/watch?v=' + response.result.items[0].id;
+      const audioUrl = response.result.items[0].contentDetails.audioStreams[0].url;
+      
+      // Output the results
+      console.log('Video URL:', videoUrl);
+      console.log('Audio URL:', audioUrl);
     }
 
     document.getElementById('btn-download').onclick = downloadYoutube
