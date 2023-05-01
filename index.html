@@ -115,7 +115,7 @@
         }).then(async function () {
           // Make an API request to get video info
           const response = await gapi.client.youtube.videos.list({
-            part: 'snippet,contentDetails,fileDetails,liveStreamingDetails,player,processingDetails,topicDetails',
+            part: 'snippet,contentDetails,liveStreamingDetails,player,topicDetails',
             id: youtubeLink.split('/').pop()
           })
 
